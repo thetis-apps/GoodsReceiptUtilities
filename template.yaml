@@ -7,16 +7,16 @@ Description: >
 # Metadata to use for the publishing to the SAR
 Metadata:
   AWS::ServerlessRepo::Application:
-    Name: thetis-ims-order-proposal-utilities
-    Description: Utility functions triggered by order proposal
+    Name: thetis-ims-goods-receipt-utilities
+    Description: Utility functions triggered by goods receipt
     Author: thetis-apps
     SpdxLicenseId: Apache-2.0
     LicenseUrl: LICENSE.txt
     ReadmeUrl: README.md
     Labels: ['thetis-ims']
-    HomePageUrl: https://github.com/thetis-apps/OrderProposalUtilities
-    SemanticVersion: 1.0.2
-    SourceCodeUrl: https://github.com/thetis-apps/OrderProposalUtilities
+    HomePageUrl: https://github.com/thetis-apps/GoodsReceiptUtilities
+    SemanticVersion: 1.0.0
+    SourceCodeUrl: https://github.com/thetis-apps/GoodsReceiptUtilities
 
 Parameters:  
   ContextId:
@@ -50,7 +50,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Description: Function that runs when a relevant document is created within Thetis IMS
-      Handler: src/app.orderProposalHandler
+      Handler: src/app.goodsReceiptHandler
       Environment:
         Variables:
           ClientId:
@@ -72,7 +72,7 @@ Resources:
               - documentCreated
               detail:
                 documentType:
-                - ORDER_PROPOSAL
+                - GOODS_RECEIPT
                 contextId:
                 - Ref: ContextId
       Timeout: 100

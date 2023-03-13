@@ -1,10 +1,10 @@
 # Introduction
 
-This application offers functions that may run automatically every time a order proposal is created.
+This application offers functions that may run automatically every time a goods receipt is created.
 
 # Installation
 
-You install the application from the connection view in Thetis IMS. The name of the application is 'thetis-ims-order-proposal-utilities'.
+You install the application from the connection view in Thetis IMS. The name of the application is 'thetis-ims-goods-receipt-utilities'.
 
 # Configuration
 
@@ -12,16 +12,19 @@ In the data document of the context:
 
 ```
 {
-  "OrderProposalUtilities": {
-    "createInboundShipment": true
+  "GoodsReceiptUtilities": {
+    "createResidualInboundShipment": true,
+    "residualInboundShipmentSuffix": "-R"
   }
 }
 ```
 # Options
 
-#### createInboundShipment
+#### createResidualInboundShipment
 
-If this field is true, the application will automatically create one or more inbound shipments every time a new order proposal is created.
+If this field is true, the application will automatically create a new inbound shipment containing that which was expected but not received.
 
-The application makes one inbound shipment for each future supplier represented in the order proposal. The latest supplier of an item is considered the future supplier. If an item has never before been purchased, it is not included in any inbound shipment.
+#### residualInboundShipmentSuffix
+
+The number of the new inbound shipment will be the the same as the old except from this suffix. 
 

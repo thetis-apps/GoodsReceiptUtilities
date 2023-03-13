@@ -56,7 +56,7 @@ async function getIMS() {
 	return ims;
 }
 
-exports.orderProposalHandler = async (event, x) => {
+exports.goodsReceiptHandler = async (event, x) => {
     
     console.log(JSON.stringify(event));
 
@@ -70,45 +70,32 @@ exports.orderProposalHandler = async (event, x) => {
     response = await ims.get('contexts/' + detail.contextId);
     let context = response.data;
     let dataDocument = JSON.parse(context.dataDocument);
-    let setup = dataDocument.OrderProposalUtilities;
+    let setup = dataDocument.GoodsReceiptUtilities;
     
-    if (setup.createInboundShipment) {
+    if (setup.createResidualInboundShipment) {
         
-        response = await ims.get('documents/' + detail.documentId + '/globalTradeItemsToOrder');
-        let lines = response.data;
+        response = await ims.get('inboundShipments/' + detail.inboundShipmentId, { params: { piggyback: true }});
+        let inboundShipment = response.data;
     
-        let i = 1;
-        let map = new Map();
-        for (let line of lines) {
-            let supplierNumbers = line.supplierNumbers;
-            if (supplierNumbers != null) {
-                let supplierNumber = supplierNumbers.split(',')[0];
-                let inboundShipment;
-                if (map.has(supplierNumber)) {
-                    inboundShipment = map.get(supplierNumber);
-                } else {
-                    inboundShipment = new Object();
-                    inboundShipment.inboundShipmentNumber = document.documentNumber + '-' + i++;
-                    inboundShipment.supplierNumber = supplierNumber;
-                    inboundShipment.inboundShipmentLines = [];
-                    map.set(supplierNumber, inboundShipment);
-                }
-    
-                console.log(map);
-                
-                let inboundShipmentLine = new Object();
-                inboundShipmentLine.inboundShipmentNumber = inboundShipment.inboundShipmentNumber;
-                inboundShipmentLine.stockKeepingUnit = line.stockKeepingUnit;
-                inboundShipmentLine.numItemsExpected = line.numItemsToOrder;
-                inboundShipment.inboundShipmentLines.push(inboundShipmentLine);
-                
+        inboundShipment.inboundShipmentNumber = inboundShipment.inboundShipmentNumber + setup.residualInboundShipmentSuffix;    
+        inboundShipment.invoiceNumber = null;
+        inboundShipment.deliveryNoteNumber = null;
+        inboundShipment.expectedTimeOfArrival = null;
+
+        let lines = [];
+        for (let line of inboundShipment.inboundShipmentLines) {
+            let numItemsReceived = line.numItemsReceived;
+            let numItemsExpected = line.numItemsExpected;
+            if (numItemsExpected != null && numItemsExpected > numItemsReceived) {
+                line.numItemsExpected = numItemsExpected - numItemsReceived;
+                lines.push(line);
             }
-        }    
+        }
         
-        for (let inboundShipment of map.values()) {
+        if (lines.length > 0) {
+            inboundShipment.inboundShipmentLines = lines;
             await ims.post('inboundShipments', inboundShipment);
         }
-    
     }
     
     await ims.patch('documents/' + document.id, { workStatus: 'DONE' });
