@@ -1,24 +1,24 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: >
+Description: '
 
   Application for triggering functions when order proposal is created.
 
-# Metadata to use for the publishing to the SAR
+  '
 Metadata:
   AWS::ServerlessRepo::Application:
     Name: thetis-ims-goods-receipt-utilities
     Description: Utility functions triggered by goods receipt
     Author: thetis-apps
     SpdxLicenseId: Apache-2.0
-    LicenseUrl: LICENSE.txt
-    ReadmeUrl: README.md
-    Labels: ['thetis-ims']
+    LicenseUrl: ../../LICENSE.txt
+    ReadmeUrl: ../../README.md
+    Labels:
+    - thetis-ims
     HomePageUrl: https://github.com/thetis-apps/GoodsReceiptUtilities
     SemanticVersion: 1.0.1
     SourceCodeUrl: https://github.com/thetis-apps/GoodsReceiptUtilities
-
-Parameters:  
+Parameters:
   ContextId:
     Type: String
     Description: Context that this application is handling events for.
@@ -32,24 +32,21 @@ Parameters:
   ApiKey:
     Type: String
   DevOpsEmail:
-    Description: The email address to send mail to when messages in the dead letter queue.
+    Description: The email address to send mail to when messages in the dead letter
+      queue.
     Type: String
     MinLength: 4
-  
-  
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Runtime: nodejs16.x
     MemorySize: 512
     Timeout: 3
-
 Resources:
-
   OrderProposalHandler:
     Type: AWS::Serverless::Function
     Properties:
-      Description: Function that runs when a relevant document is created within Thetis IMS
+      Description: Function that runs when a relevant document is created within Thetis
+        IMS
       Handler: src/app.goodsReceiptHandler
       Environment:
         Variables:
@@ -82,12 +79,12 @@ Resources:
           Fn::GetAtt:
           - DeadLetterQueue
           - Arn
-          
-
-  # Our standard monitoring setup      
+      CodeUri: OrderProposalHandler
+    Metadata:
+      SamResourceId: OrderProposalHandler
   DeadLetterQueue:
     Type: AWS::SQS::Queue
-    Properties: 
+    Properties:
       KmsMasterKeyId: alias/aws/sqs
   Alarm:
     Type: AWS::CloudWatch::Alarm
@@ -115,7 +112,7 @@ Resources:
     Properties:
       KmsMasterKeyId: alias/aws/sns
       Subscription:
-      - Endpoint: 
-          Ref: DevOpsEmail        
+      - Endpoint:
+          Ref: DevOpsEmail
         Protocol: email
       DisplayName: Incidents to be handled by Thetis Devops.
